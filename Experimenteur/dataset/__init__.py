@@ -1,7 +1,7 @@
 import tables as tb
 import numpy as np
 import pandas as pd
-import hdf5 as h5
+import h5py as h5
 
 class Dataset:
     """
@@ -35,8 +35,8 @@ class Dataset:
 }
     """
 
-    def __init__(self, configuration):
-        self.properties = dict(configuration.items('dataset'))
+    def __init__(self, properties):
+        self.properties = properties
         if not self.properties.has_key('source_path'):
             raise Exception('Missing \'source_path\' property in dataset configuration options.')
 

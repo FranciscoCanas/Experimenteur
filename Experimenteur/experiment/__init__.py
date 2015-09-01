@@ -12,11 +12,13 @@ class Experiment:
      a dataset and model.
     """
 
-    def __init__(self, config_path):
+    def __init__(self, config_path, model=None, dataset=None):
         self.configuration = ConfigParser.ConfigParser()
+        self.configuration.read(config_path)
         self.properties = dict(self.configuration.items('experiment'))
-        self.dataset = Dataset(self.configuration)
-        self.model = Model(self.configuration)
+        self.model = model if model else Model(dict(self.configuration.items('model')),
+                                               dict(self.configuration.items('parameters')))
+        self.dataset = dataset if dataset else Dataset(dict(self.configuration.items('dataset')))
 
         self.cross_val_fn_map = {
             'n_trials': self.n_trials_fn,
