@@ -5,16 +5,19 @@ from Experimenteur.dataset import Dataset
 from Experimenteur.experiment import Experiment
 from Experimenteur.model import Model
 
+def setup(self):
+    self.config_path = './data/cfg/test1.cfg'
+    self.test_model_props = {'name': 'testClassifier', 'class': 'sklearn.ensemble.AdaBoostClassifier'}
+    self.test_model_params = {'n_estimators': 5}
+    self.test_data_props = {'source_path': './data/matrices/test_data.npy'}
+
 
 class TestConfigs(unittest.TestCase):
     """
     Test config file readin'
     """
     def setUp(self):
-        self.config_path = './data/test1.cfg'
-        self.test_model_props = {'name': 'testClassifier', 'class': 'sklearn.ensemble.AdaBoostClassifier'}
-        self.test_model_params = {'n_estimators': 5}
-        self.test_data_props = {'source_path': './data/test.npy'}
+        setup(self)
 
     def test_readConfig(self):
         config = ConfigParser.ConfigParser()
@@ -31,3 +34,29 @@ class TestConfigs(unittest.TestCase):
 
     def test_init_ExperimentCustomData(self):
         data = Dataset(self.test_data_props)
+
+
+class TestExperiment(unittest.TestCase):
+    def setUp(self):
+        setup(self)
+
+
+    def test_classify(self):
+        exp = Experiment(self.config_path)
+        exp.run()
+        exp.report()
+        exp.display()
+
+
+
+class TestSplitDataExperiment(unittest.TestCase):
+    def setUp(self):
+        setup(self)
+        self.config_path = './data/cfg/test_split_2.cfg'
+
+
+    def test_classify(self):
+        exp = Experiment(self.config_path)
+        exp.run()
+        exp.report()
+        exp.display()

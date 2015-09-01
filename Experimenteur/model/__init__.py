@@ -1,4 +1,6 @@
 import importlib
+from tabulate import tabulate
+
 
 class Model:
     """
@@ -8,9 +10,15 @@ class Model:
 
     def __init__(self, properties, parameters):
         self.properties = properties
-        self.parameters = parameters
         self.name = self.properties.get('name', 'name')
+        self.init_params(parameters)
         self.init_model()
+
+    def init_params(self, parameters):
+        self.parameters = {}
+        for k, v in parameters.items():
+            v = eval(v) if isinstance(v, str) else v
+            self.parameters[k] = v
 
     def init_model(self):
         """
@@ -27,23 +35,41 @@ class Model:
         self.model = class_(**self.parameters)
 
 
-    def fit(self):
+    def fit(self, X, y=None):
         """
         This method assumes your model instance uses sklearn style interface: ie. fit(X,y).
 
         Override if it doesn't.
         :return: Array of training metrics.
         """
-        pass
+        metrics = []
+        if y is None:
+            self.model.fit(X)
 
-    def evaluate(self):
+        else:
+            self.model.fit(X, y)
+            acc = self.model.score(X, y)
+            metrics.append(acc)
+
+        return metrics
+
+    def evaluate(self, X, y):
         """
         This method assumes your model instance uses sklearn style interface: ie. score(X,y).
 
         Override if it doesn't.
         :return: Array of metrics.
         """
-        pass
+        metrics = []
+        acc = self.model.score(X, y)
+        metrics.append(acc)
+        return metrics
+
+    def display(self):
+        print 'Model:'
+        print tabulate([(k, str(v)) for k, v in self.properties.iteritems()])
+        print 'Parameters:'
+        print tabulate([(k, str(v)) for k, v in self.parameters.iteritems()])
 
 
 
