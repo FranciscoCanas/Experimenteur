@@ -48,7 +48,6 @@ class TestExperiment(unittest.TestCase):
         exp.display()
 
 
-
 class TestSplitDataExperiment(unittest.TestCase):
     def setUp(self):
         setup(self)

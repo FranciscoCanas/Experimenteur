@@ -90,6 +90,7 @@ class Dataset:
         pass
 
     def display(self):
+        print
         print 'Dataset Properties:'
         print tabulate([(k, str(v)) for k, v in self.properties.iteritems()])
 

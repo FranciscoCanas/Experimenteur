@@ -10,14 +10,17 @@ class Model:
 
     def __init__(self, properties, parameters):
         self.properties = properties
-        self.name = self.properties.get('name', 'name')
+        self.name = self.properties.get('name', 'myexperiment')
         self.init_params(parameters)
         self.init_model()
 
     def init_params(self, parameters):
         self.parameters = {}
         for k, v in parameters.items():
-            v = eval(v) if isinstance(v, str) else v
+            try:
+                v = eval(v)
+            except (TypeError, NameError) as e:
+                pass
             self.parameters[k] = v
 
     def init_model(self):
@@ -30,7 +33,7 @@ class Model:
         model_class = self.properties.get('class')
         if not model_class:
             raise Exception('No model class specified under model properties.')
-        module_name, class_name = model_class.rsplit(".", 1)
+        module_name, class_name = model_class.rsplit('.', 1)
         class_ = getattr(importlib.import_module(module_name), class_name)
         self.model = class_(**self.parameters)
 
@@ -48,8 +51,8 @@ class Model:
 
         else:
             self.model.fit(X, y)
-            acc = self.model.score(X, y)
-            metrics.append(acc)
+            score = self.model.score(X, y)
+            metrics.append(score)
 
         return metrics
 
@@ -61,11 +64,13 @@ class Model:
         :return: Array of metrics.
         """
         metrics = []
-        acc = self.model.score(X, y)
-        metrics.append(acc)
+        score = self.model.score(X, y)
+        metrics.append(score)
+
         return metrics
 
     def display(self):
+        print
         print 'Model:'
         print tabulate([(k, str(v)) for k, v in self.properties.iteritems()])
         print 'Parameters:'
