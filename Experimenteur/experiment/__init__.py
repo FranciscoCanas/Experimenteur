@@ -1,5 +1,4 @@
 import numpy as np
-import tabulate as tabulate
 import ConfigParser
 from sklearn.cross_validation import StratifiedShuffleSplit, ShuffleSplit, KFold
 from tabulate import tabulate
@@ -13,6 +12,8 @@ class Experiment:
      a dataset and model.
     """
     statistics_header = ['Training Score', 'Validation Score']
+    metrics_header = []
+    summary_header = ['Training Score Mean', 'STD', 'Validation Score Mean', 'STD']
     properties_header = ['Property', 'Value']
 
     def __init__(self, config_path, model=None, dataset=None):
@@ -38,18 +39,29 @@ class Experiment:
 
         for j, fold in enumerate(folds):
             self.dataset.load_data(fold)
-            self.statistics = []
+            self.metrics = []
 
             for X, X_held_out, y, y_held_out, in cv_fn():
                 training_metrics = self.model.fit(X, y)
-                validation_metrics = self.model.evaluate(X_held_out, y_held_out)
+                validation_metrics, header = self.model.score(X_held_out, y_held_out)
 
-                self.statistics.append(training_metrics + validation_metrics)
+                self.metrics.append(training_metrics + validation_metrics)
+                self.metrics_header = header
+
+            self.metrics = np.array(self.metrics)
+            self.summary()
 
 
     def report(self):
         print
-        print tabulate(self.statistics, self.statistics_header)
+        print tabulate(self.metrics, self.statistics_header + self.metrics_header)
+        print
+        print tabulate(self.summary_stats, self.summary_header)
+
+    def summary(self):
+        trains = self.metrics[:,0]
+        valids = self.metrics[:,1]
+        self.summary_stats = [[np.mean(trains), np.std(trains), np.mean(valids), np.std(valids)]]
 
 
     def display(self):
@@ -67,9 +79,13 @@ class Experiment:
         X = self.dataset.X
         y = self.dataset.y
         balanced = self.properties.get('balanced', True)
-        v_size = self.properties.get('validation_size', 0.25)
-        shuffle_fn = StratifiedShuffleSplit if balanced else ShuffleSplit
-        splits = shuffle_fn(y, test_size=v_size)
+        folds = int(self.properties.get('cv_folds', 1))
+        v_size = float(self.properties.get('validation_size', 0.25))
+        if balanced and 'classification' in self.model.type:
+            splits = StratifiedShuffleSplit(y, n_iter=folds, test_size=v_size)
+        else:
+            splits = ShuffleSplit(X.shape[0], test_size=v_size, n_iter=folds)
+
         return [(X[tinds], X[vinds], y[tinds], y[vinds]) for tinds, vinds in splits]
 
     def n_trials_fn(self):

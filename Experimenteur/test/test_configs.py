@@ -12,6 +12,12 @@ def setup(self):
     self.test_data_props = {'source_path': './data/matrices/test_data.npy'}
 
 
+def run(exp):
+    exp.display()
+    exp.run()
+    exp.report()
+
+
 class TestConfigs(unittest.TestCase):
     """
     Test config file readin'
@@ -43,9 +49,7 @@ class TestExperiment(unittest.TestCase):
 
     def test_classify(self):
         exp = Experiment(self.config_path)
-        exp.run()
-        exp.report()
-        exp.display()
+        run(exp)
 
 
 class TestSplitDataExperiment(unittest.TestCase):
@@ -56,6 +60,15 @@ class TestSplitDataExperiment(unittest.TestCase):
 
     def test_classify(self):
         exp = Experiment(self.config_path)
-        exp.run()
-        exp.report()
-        exp.display()
+        run(exp)
+
+
+class TestRegressionExperiment(unittest.TestCase):
+    def setUp(self):
+        setup(self)
+        self.config_path = './data/cfg/test_regression.cfg'
+
+
+    def test_classify(self):
+        exp = Experiment(self.config_path)
+        run(exp)
