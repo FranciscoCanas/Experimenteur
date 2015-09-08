@@ -16,13 +16,14 @@ class Experiment:
     summary_header = ['Training Score Mean', 'STD', 'Validation Score Mean', 'STD']
     properties_header = ['Property', 'Value']
 
-    def __init__(self, config_path, model=None, dataset=None):
+    def __init__(self, config_path, model=Model, dataset=Dataset):
         self.configuration = ConfigParser.ConfigParser()
+        self.configuration.optionxform = str
         self.configuration.read(config_path)
         self.properties = dict(self.configuration.items('experiment'))
-        self.model = model if model else Model(dict(self.configuration.items('model')),
-                                               dict(self.configuration.items('parameters')))
-        self.dataset = dataset if dataset else Dataset(dict(self.configuration.items('dataset')))
+        self.model = model(properties=dict(self.configuration.items('model')),
+                           parameters=dict(self.configuration.items('parameters')))
+        self.dataset = dataset(properties=dict(self.configuration.items('dataset')))
 
         self.cross_val_fn_map = {
             'n_trials': self.n_trials_fn,
@@ -59,8 +60,8 @@ class Experiment:
         print tabulate(self.summary_stats, self.summary_header)
 
     def summary(self):
-        trains = self.metrics[:,0]
-        valids = self.metrics[:,1]
+        trains = self.metrics[:, 0]
+        valids = self.metrics[:, 1]
         self.summary_stats = [[np.mean(trains), np.std(trains), np.mean(valids), np.std(valids)]]
 
 

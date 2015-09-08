@@ -13,9 +13,6 @@ from Experimenteur.model import Model
 
 def setup(self):
     self.config_path = './data/cfg/test_custom.cfg'
-    self.test_data_props = {'source_path': './data/frames/custom_1.csv'}
-    self.test_model_props = {'name': 'testClassifier'}
-    self.test_model_params = {'C': 0.1, 'multi_class': 'ovr', 'solver': 'liblinear', 'penalty': 'l2', 'n_components': 5}
 
 def run(exp):
     exp.display()
@@ -23,7 +20,7 @@ def run(exp):
     exp.report()
 
 
-class customModel(Model):
+class CustomModel(Model):
     def init_model(self):
         C = self.parameters['C']
         n_components = self.parameters['n_components']
@@ -34,7 +31,7 @@ class customModel(Model):
         self.model = Pipeline(steps=[('pca', pca), ('logistic', logistic)])
 
 
-class customRegressionModel(Model):
+class CustomRegressionModel(Model):
     def init_model(self):
         C = self.parameters['C']
         n_components = self.parameters['n_components']
@@ -46,7 +43,7 @@ class customRegressionModel(Model):
 
 
 
-class customData(Dataset):
+class CustomData(Dataset):
     def load_data(self, fold=''):
         d = pd.read_csv(self.properties['source_path'])
         self.X = d.ix[:,'V_0':].as_matrix()
@@ -62,14 +59,12 @@ class TestCustom(unittest.TestCase):
         setup(self)
 
     def test_custom_model(self):
-        model = customModel(self.test_model_props, self.test_model_params)
-        exp = Experiment(self.config_path, model=model)
+        exp = Experiment(self.config_path, model=CustomModel)
         run(exp)
 
     def test_custom_data(self):
-        data = customData(self.test_data_props)
-        model = customModel(self.test_model_props, self.test_model_params)
-        exp = Experiment(self.config_path, model=model, dataset=data)
+        config_path = './data/cfg/test_custom_dataset.cfg'
+        exp = Experiment(config_path, model=CustomModel, dataset=CustomData)
         run(exp)
 
 
@@ -77,9 +72,7 @@ class TestCustomRegression(unittest.TestCase):
     def setUp(self):
         setup(self)
         self.config_path = './data/cfg/test_custom_regression.cfg'
-        self.test_model_props['type'] = 'regression'
 
     def test_custom_model(self):
-        model = customRegressionModel(self.test_model_props, self.test_model_params)
-        exp = Experiment(self.config_path, model=model)
+        exp = Experiment(self.config_path, model=CustomRegressionModel)
         run(exp)
